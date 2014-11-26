@@ -181,6 +181,7 @@ public class TitleBar extends RelativeLayout {
             setupTitleBarAnimator(mTitleBarAnimator);
             mTitleBarAnimator.start();
         }
+        setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         mShowing = true;
     }
 

@@ -18,6 +18,8 @@
     <integer name="max_suggest_lines_portrait">4</integer>
     <!--  The maximum number of open tabs -->
     <integer name="max_tabs">16</integer>
+    <!--  The maximum active tabs, 0 means no limit -->
+    <integer name="max_active_tabs">0</integer>
     <!--  The duration of the tab animations in millisecs  -->
     <integer name="tab_animation_duration">200</integer>
     <!-- The maximum number of most visited URLs in the history tab -->
@@ -30,4 +32,7 @@
     <integer name="max_bookmark_columns">5</integer>
     <!-- The duration of the titlebar animation in millisecs -->
     <integer name="titlebar_animation_duration">200</integer>
+
+    <!-- min size of system cache need, unit is MB -->
+    <integer name="min_os_cache_size">28</integer>
 </resources>

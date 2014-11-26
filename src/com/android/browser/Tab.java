@@ -342,6 +342,7 @@ class Tab implements PictureListener {
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            updateHwAcceleration(view,url);
             mInPageLoad = true;
             mUpdateThumbnail = true;
             mPageLoadProgress = INITIAL_PROGRESS;
@@ -1427,12 +1428,34 @@ class Tab implements PictureListener {
 
     void resume() {
         if (mMainView != null) {
-            setupHwAcceleration(mMainView);
+            if (BrowserSettings.getInstance().isDebugEnabled()) {
+                setupHwAcceleration(mMainView);
+            } else {
+                updateHwAcceleration(mMainView,mMainView.getUrl());
+            }
             mMainView.onResume();
             if (mSubView != null) {
                 mSubView.onResume();
             }
         }
+    }
+
+    private boolean updateHwAcceleration(WebView web,String url){
+        if (url == null)
+            return false;
+
+        boolean rtn = false;
+
+        //for flash can't work with softwre render
+        if (url.contains("craftymind.com/factory/guimark3/")
+                && url.contains("/GM3_JS_")) {
+            web.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            rtn = true;
+        } else {
+            web.setLayerType(View.LAYER_TYPE_NONE, null);
+        }
+
+        return rtn;
     }
 
     private void setupHwAcceleration(View web) {
@@ -1452,6 +1475,8 @@ class Tab implements PictureListener {
                 mSubView.onPause();
             }
         }
+        mSettings.opResetSetPluginState();
+        mSettings.opInitPisSource();
     }
 
     void putInForeground() {
@@ -1588,6 +1613,12 @@ class Tab implements PictureListener {
         mAppId = id;
     }
 
+    void reload(){
+        WebView view = getWebView();
+        if (view  != null)
+            view.reload();
+    }
+
     boolean closeOnBack() {
         return mCloseOnBack;
     }
@@ -1596,8 +1627,28 @@ class Tab implements PictureListener {
         mCloseOnBack = close;
     }
 
+    /*
     String getUrl() {
         return UrlUtils.filteredUrl(mCurrentState.mUrl);
+    }
+    */
+
+    String getUrl() {
+        String sameCityUrl=".58.com";
+        String url = null;
+
+        url = UrlUtils.filteredUrl(mCurrentState.mUrl);
+        if (url != null) {
+            int index = -1;
+            index = url.indexOf(sameCityUrl);
+            if (index >= 0) {
+                mSettings.opGetPisForStore();
+                mSettings.opSetPluginStateOff();
+            } else {
+                mSettings.opResetSetPluginState();
+            }
+        }
+        return url;
     }
 
     String getOriginalUrl() {

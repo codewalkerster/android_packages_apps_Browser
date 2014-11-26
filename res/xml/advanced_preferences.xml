@@ -25,6 +25,13 @@
             android:summary="@string/pref_content_search_engine_summary"
             android:dialogTitle="@string/pref_content_search_engine" />
 
+    <ListPreference
+            android:key="user_agent"
+            android:title="@string/pref_development_uastring"
+            android:entries="@array/pref_development_ua_choices"
+            android:entryValues="@array/pref_development_ua_values"
+            android:defaultValue="3"/>
+
     <CheckBoxPreference
             android:key="open_in_background"
             android:defaultValue="false"
@@ -44,7 +51,7 @@
     <ListPreference
             android:key="plugin_state"
             android:title="@string/pref_content_plugins"
-            android:defaultValue="ON"
+            android:defaultValue="OFF"
             android:entries="@array/pref_content_plugins_choices"
             android:entryValues="@array/pref_content_plugins_values"
             android:dialogTitle="@string/pref_content_plugins" />

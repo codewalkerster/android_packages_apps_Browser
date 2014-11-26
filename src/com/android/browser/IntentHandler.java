@@ -164,6 +164,8 @@ public class IntentHandler {
                         mController.switchToTab(appTab);
                     }
                     // Otherwise, we are already viewing the correct tab.
+                    // the content of page may changed, so we need reload the url.
+                    appTab.reload();
                 } else {
                     // if FLAG_ACTIVITY_BROUGHT_TO_FRONT flag is on, the url
                     // will be opened in a new tab unless we have reached

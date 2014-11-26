@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -104,6 +105,9 @@ public class NavigationBarBase extends LinearLayout implements
         }
         if (hasFocus) {
             mBaseUi.showTitleBar();
+            if (SystemProperties.getBoolean("ro.platform.has.mbxuimode", false)
+                    && (!view.isInTouchMode()) && mBaseUi.isWebShowing())
+                mUrlInput.showIME();
         } else if (!mUrlInput.needsUpdate()) {
             mUrlInput.dismissDropDown();
             mUrlInput.hideIME();

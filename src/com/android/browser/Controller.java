@@ -68,6 +68,7 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.HttpAuthHandler;
@@ -442,6 +443,10 @@ public class Controller
 
     int getMaxTabs() {
         return mActivity.getResources().getInteger(R.integer.max_tabs);
+    }
+
+    int getMaxActiveTabs() {
+        return mActivity.getResources().getInteger(R.integer.max_active_tabs);
     }
 
     @Override
@@ -1691,6 +1696,7 @@ public class Controller
 
     @Override
     public void findOnPage() {
+        ((BaseUi)mUi).mTitleBar.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         getCurrentTopWebView().showFindDialog(null, true);
     }
 
@@ -2599,16 +2605,22 @@ public class Controller
                 tab.goForward();
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
+                ((BaseUi)mUi).showTitleBar();
                 if (ctrl) {
                     tab.goBack();
                     return true;
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
+                ((BaseUi)mUi).showTitleBar();
                 if (ctrl) {
                     tab.goForward();
                     return true;
                 }
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                ((BaseUi)mUi).showTitleBar();
                 break;
 //          case KeyEvent.KEYCODE_B:    // menu
 //          case KeyEvent.KEYCODE_D:    // menu

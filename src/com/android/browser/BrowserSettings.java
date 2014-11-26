@@ -67,9 +67,9 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
         "CPU iPhone OS 4_0 like Mac OS X; en-us) AppleWebKit/532.9 " +
         "(KHTML, like Gecko) Version/4.0.5 Mobile/8A293 Safari/6531.22.7";
 
-    private static final String IPAD_USERAGENT = "Mozilla/5.0 (iPad; U; " +
-        "CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 " +
-        "(KHTML, like Gecko) Version/4.0.4 Mobile/7B367 Safari/531.21.10";
+    private static final String IPAD_USERAGENT = "Mozilla/5.0 (iPad; " +
+        "CPU OS 5_0_1 like Mac OS X) AppleWebKit/534.46 "	+
+        "(KHTML, like Gecko) Version/5.1 Mobile/9A405 Safari/7534.48.3";
 
     private static final String FROYO_USERAGENT = "Mozilla/5.0 (Linux; U; " +
         "Android 2.2; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 " +
@@ -171,6 +171,46 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
                 return;
             }
         }
+    }
+
+    //tony.wang add for 58
+    private String pis = null;
+    private boolean pisStored = false;
+    private boolean pisChanged = false;
+    private void opSetPluginState(String state) {
+        setPluginStateEx(state);
+    }
+
+    public void opSetPluginStateOff() {
+        if (pisChanged == false) {
+            pisChanged = true;
+            setPluginStateEx("OFF");
+        }
+    }
+
+    public void opResetSetPluginState() {
+        if ((pisStored == true) && (pisChanged == true)) {
+            if (pis != null) {
+                pisStored = false;
+                if (!pis.equals(getPluginStateEx())) {
+                    opSetPluginState(pis);
+                    pisChanged = false;
+                }
+            }
+        }
+    }
+
+    public void opGetPisForStore() {
+        if (pisStored == false) {
+            pis = getPluginStateEx();
+            pisStored = true;
+        }
+    }
+
+    public void opInitPisSource() {
+        pisStored = false;
+        pisChanged = false;
+        pis = null;
     }
 
     private Runnable mSetup = new Runnable() {
@@ -630,6 +670,15 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
         return PluginState.valueOf(state);
     }
 
+    public void setPluginStateEx(String state){
+        mPrefs.edit().putString(PREF_PLUGIN_STATE, state).apply();
+    }
+
+    public String getPluginStateEx() {
+        String state = mPrefs.getString(PREF_PLUGIN_STATE, "ON");
+        return state;
+    }
+
     // TODO: Cache
     public ZoomDensity getDefaultZoom() {
         String zoom = mPrefs.getString(PREF_DEFAULT_ZOOM, "MEDIUM");
@@ -684,7 +733,7 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
         if (!isDebugEnabled()) {
             return true;
         }
-        return mPrefs.getBoolean(PREF_ENABLE_HARDWARE_ACCEL, true);
+        return mPrefs.getBoolean(PREF_ENABLE_HARDWARE_ACCEL, false);
     }
 
     public boolean isSkiaHardwareAccelerated() {
@@ -695,10 +744,7 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
     }
 
     public int getUserAgent() {
-        if (!isDebugEnabled()) {
-            return 0;
-        }
-        return Integer.parseInt(mPrefs.getString(PREF_USER_AGENT, "0"));
+        return Integer.parseInt(mPrefs.getString(PREF_USER_AGENT, "3"));
     }
 
     // -----------------------------

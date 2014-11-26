@@ -19,6 +19,7 @@ package com.android.browser;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
+import android.os.SystemProperties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,8 @@ class TabControl {
 
     private OnThumbnailUpdatedListener mOnThumbnailUpdatedListener;
 
+    //0 means don't to limit active tab number
+    private int mMaxActiveTabs = 0;
     /**
      * Construct a new TabControl object
      */
@@ -60,6 +63,8 @@ class TabControl {
         mMaxTabs = mController.getMaxTabs();
         mTabs = new ArrayList<Tab>(mMaxTabs);
         mTabQueue = new ArrayList<Tab>(mMaxTabs);
+        if (SystemProperties.getBoolean("ro.config.low_ram", false))
+            mMaxActiveTabs = mController.getMaxActiveTabs();
     }
 
     synchronized static long getNextId() {
@@ -198,6 +203,10 @@ class TabControl {
             return null;
         }
 
+        // -1,for now we need create a new tab now,
+        // do it before create new tab, for we may release it when limit tabs.
+        if (mMaxActiveTabs > 0)
+            limitTabs(getCurrentTab(), mMaxActiveTabs-1);
         final WebView w = createNewWebView(privateBrowsing);
 
         // Create a new tab and add it to the tab list
@@ -444,6 +453,37 @@ class TabControl {
         }
     }
 
+    private void limitTabs(Tab current, int maxTabs){
+        if ((maxTabs <= 0) || (getTabCount() <= maxTabs))
+            return ;
+
+        Vector<Tab> tabsToGo = new Vector<Tab>();
+        int openTabCount = 0;
+        int otherTabs = 0;
+        for (Tab t : mTabQueue) {
+            if (t != null && t.getWebView() != null) {
+                openTabCount++;
+                if (t != current) {
+                    tabsToGo.add(t);
+                }
+            }
+        }
+
+        int tabsToClose = openTabCount - maxTabs;
+        if (tabsToClose > 0) {
+            if (tabsToClose <= tabsToGo.size()) {//has tabs to free
+                tabsToGo.setSize(tabsToClose);
+            }
+            if (tabsToGo.size() > 0) {
+                for (Tab t : tabsToGo) {
+                    t.saveState();
+                    t.destroy();
+                }
+            }
+        }
+
+    }
+
     /**
      * Free the memory in this order, 1) free the background tabs; 2) free the
      * WebView cache;
@@ -498,7 +538,17 @@ class TabControl {
             }
         }
 
+        //free other tabs first.
+        //no other tabs?? to free the parent tab
+        if (tabsToGo.size() == 0) {
+            Tab t = current.getParent();
+            if (t != null && t.getWebView() != null) {
+                tabsToGo.add(t);
+            }
+        }
+
         openTabCount /= 2;
+
         if (tabsToGo.size() > openTabCount) {
             tabsToGo.setSize(openTabCount);
         }
@@ -671,6 +721,10 @@ class TabControl {
             newTab.setWebView(mainView);
         }
         newTab.putInForeground();
+
+        //when put a tab to front, we need to re-check the tabs
+        if (mMaxActiveTabs > 0)
+            limitTabs(getCurrentTab(),mMaxActiveTabs);
         return true;
     }
 
