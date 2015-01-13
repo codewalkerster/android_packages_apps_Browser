@@ -745,7 +745,7 @@ public class BrowserSettings implements OnSharedPreferenceChangeListener,
     }
 
     public int getUserAgent() {
-        return Integer.parseInt(mPrefs.getString(PREF_USER_AGENT, "3"));
+        return Integer.parseInt(mPrefs.getString(PREF_USER_AGENT, "0"));
     }
 
     // -----------------------------
