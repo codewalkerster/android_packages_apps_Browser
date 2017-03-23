@@ -98,4 +98,13 @@ public class BrowserPreferencesPage extends PreferenceActivity {
         return intent;
     }
 
+    @Override
+    public boolean isValidFragment(String fragmentName) {
+        for (Header h : mHeaders) {
+           if (fragmentName.equals(h.fragment)) {
+               return true;
+           }
+       }
+       return false;
+    }
 }
